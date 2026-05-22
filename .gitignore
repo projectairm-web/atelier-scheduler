@@ -1,0 +1,26 @@
+node_modules/
+dist/
+.env
+.env.local
+
+# Editor
+.vscode/
+.idea/
+
+# Claude Code internal
+.claude/
+
+# Dev screenshots & scripts
+screenshot*.mjs
+ss*.mjs
+ss2.mjs
+ss3.mjs
+ss4.mjs
+preview*.png
+ss-*.png
+preview-*.png
+screenshot*.png
+
+# OS
+.DS_Store
+Thumbs.db

@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Atelier Pianificazione</string>
+    <string name="title_activity_main">Atelier Pianificazione</string>
+    <string name="package_name">com.atelier.pianificazione</string>
+    <string name="custom_url_scheme">com.atelier.pianificazione</string>
+</resources>

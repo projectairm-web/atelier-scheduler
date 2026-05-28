@@ -78,13 +78,18 @@ export default function App() {
   };
 
   // ── Export
-  const handleExport = () => {
-    exportWeekToExcel({
-      stores: state.stores,
-      people: state.people,
-      weekSchedule,
-      monday: currentMonday,
-    });
+  const handleExport = async () => {
+    try {
+      await exportWeekToExcel({
+        stores: state.stores,
+        people: state.people,
+        weekSchedule,
+        monday: currentMonday,
+      });
+    } catch (err) {
+      console.error("Export failed:", err);
+      alert("Errore durante l'esportazione: " + (err?.message ?? err));
+    }
   };
 
   // ── Toggle person in a slot

@@ -1,4 +1,5 @@
 import * as XLSX from "xlsx";
+import { Capacitor } from "@capacitor/core";
 import { addDays, formatWeekRange } from "./date.js";
 import { DAYS_SHORT } from "../constants/index.js";
 
@@ -12,9 +13,50 @@ function applyColWidths(ws, widths) {
   ws["!cols"] = widths.map(w => ({ wch: w }));
 }
 
+function buildFilename(monday) {
+  return `Pianificazione_${formatWeekRange(monday)
+    .replace(/\s+/g, "_")
+    .replace(/–/g, "-")
+    .replace(/[^\w_-]/g, "")}.xlsx`;
+}
+
+/* ── Android: write to cache + native share sheet ────────── */
+async function exportNative(wb, filename) {
+  const { Filesystem, Directory } = await import("@capacitor/filesystem");
+  const { Share }                 = await import("@capacitor/share");
+
+  // Generate workbook as base64 (no file system access needed)
+  const base64 = XLSX.write(wb, { bookType: "xlsx", type: "base64" });
+
+  // Write to app cache (no storage permission required)
+  await Filesystem.writeFile({
+    path: filename,
+    data: base64,
+    directory: Directory.Cache,
+  });
+
+  // Resolve the native file URI
+  const { uri } = await Filesystem.getUri({
+    path: filename,
+    directory: Directory.Cache,
+  });
+
+  // Open the Android share sheet (Drive, Gmail, WhatsApp, …)
+  await Share.share({
+    title: filename.replace(".xlsx", ""),
+    url: uri,
+    dialogTitle: "Esporta pianificazione",
+  });
+}
+
+/* ── Web: normal browser download ────────────────────────── */
+function exportWeb(wb, filename) {
+  XLSX.writeFile(wb, filename);
+}
+
 /* ── Main export ─────────────────────────────────────────── */
-export function exportWeekToExcel({ stores, people, weekSchedule, monday }) {
-  const wb = XLSX.utils.book_new();
+export async function exportWeekToExcel({ stores, people, weekSchedule, monday }) {
+  const wb         = XLSX.utils.book_new();
   const dayHeaders = [0, 1, 2, 3, 4, 5, 6].map(i => dayHeader(monday, i));
 
   /* Sheet 1 — Griglia negozi × giorni */
@@ -54,10 +96,12 @@ export function exportWeekToExcel({ stores, people, weekSchedule, monday }) {
   applyColWidths(ws2, [20, 8, ...Array(7).fill(22), 10, 10]);
   XLSX.utils.book_append_sheet(wb, ws2, "Personale");
 
-  /* Download */
-  const label = formatWeekRange(monday)
-    .replace(/\s+/g, "_")
-    .replace(/–/g, "-")
-    .replace(/[^\w_-]/g, "");
-  XLSX.writeFile(wb, `Pianificazione_${label}.xlsx`);
+  /* Route to the right export method */
+  const filename = buildFilename(monday);
+
+  if (Capacitor.isNativePlatform()) {
+    await exportNative(wb, filename);
+  } else {
+    exportWeb(wb, filename);
+  }
 }

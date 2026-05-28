@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { STORAGE_KEY, SEED } from "./constants/index.js";
-import { getMondayOf, addDays, weekKey, formatWeekRange } from "./utils/date.js";
+import { getMondayOf, addDays, weekKey, formatWeekRange, toLocalDateStr } from "./utils/date.js";
 import { uid } from "./utils/people.js";
 import { generateSchedule } from "./algorithms/scheduler.js";
 import { exportWeekToExcel } from "./utils/export.js";
@@ -107,8 +107,8 @@ export default function App() {
         const av = person.availability ?? [];
         if (av.length > 0 && !av.includes(day)) return s;
 
-        // Check absence for this specific date
-        const dateStr = addDays(currentMonday, day).toISOString().slice(0, 10);
+        // Check absence for this specific date (local date, not UTC)
+        const dateStr = toLocalDateStr(addDays(currentMonday, day));
         if (s.absences[personId]?.[dateStr]) return s;
 
         next = [...current, personId];

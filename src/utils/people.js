@@ -4,18 +4,24 @@ export const uid = () => Math.random().toString(36).slice(2, 10);
 /**
  * "Giulia Rossi" → "Giulia R."
  * Un solo token → restituito invariato.
+ * Stringa vuota → "—"
  */
 export function displayName(name) {
-  const parts = name.trim().split(/\s+/);
+  const trimmed = name.trim();
+  if (!trimmed) return "—";
+  const parts = trimmed.split(/\s+/);
   if (parts.length === 1) return parts[0];
   return `${parts[0]} ${parts[parts.length - 1][0]}.`;
 }
 
-/** "Giulia Rossi" → "GR" */
+/** "Giulia Rossi" → "GR" — "Giulia" → "G" — "" → "?" */
 export function initials(name) {
-  return name
+  const trimmed = name.trim();
+  if (!trimmed) return "?";
+  return trimmed
     .split(/\s+/)
-    .map((w) => w[0])
+    .filter(Boolean)
+    .map(w => w[0])
     .slice(0, 2)
     .join("")
     .toUpperCase();

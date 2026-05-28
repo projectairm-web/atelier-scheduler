@@ -15,6 +15,18 @@ export function addDays(date, n) {
   return d;
 }
 
+/**
+ * Restituisce la data come stringa ISO locale (YYYY-MM-DD)
+ * senza conversione UTC — necessario per confrontare con le
+ * date di assenza salvate dal calendario.
+ */
+export function toLocalDateStr(date) {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
+
 /** Chiave stringa ISO della settimana (es. "2025-05-19"). */
 export function weekKey(date) {
   return getMondayOf(date).toISOString().slice(0, 10);

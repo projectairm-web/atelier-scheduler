@@ -1,4 +1,4 @@
-import { addDays } from "../utils/date.js";
+import { addDays, toLocalDateStr } from "../utils/date.js";
 
 /**
  * Algoritmo di pianificazione automatica — approccio greedy.
@@ -33,10 +33,9 @@ export function generateSchedule(data, { monday, absences = {} } = {}) {
     schedule[day] = {};
     const assignedThisDay = new Set();
 
-    // Actual ISO date for this slot (used to check absences)
-    const dateStr = monday
-      ? addDays(monday, day).toISOString().slice(0, 10)
-      : null;
+    // Actual local date string for this slot (used to check absences)
+    // Uses toLocalDateStr — NOT toISOString — to avoid UTC offset issues
+    const dateStr = monday ? toLocalDateStr(addDays(monday, day)) : null;
 
     for (const store of sortedStores) {
       const assigned = [];

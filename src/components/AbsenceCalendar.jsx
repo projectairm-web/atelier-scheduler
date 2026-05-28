@@ -37,13 +37,16 @@ export default function AbsenceCalendar({ people, absences, onToggle, onClose })
   const [year,   setYear]   = useState(now.getFullYear());
   const [month,  setMonth]  = useState(now.getMonth());
 
+  // If the selected person was deleted while the modal is open, fall back to first
+  const selIdSafe = people.find(p => p.id === selId) ? selId : (people[0]?.id ?? null);
+
   // Build absence type config from translations
   const ABSENCE = {
     ferie:    { label: t.leaveLabel,      short: t.leaveShort,      color: "#166534", bg: "#dcfce7", border: "#86efac" },
     permesso: { label: t.permissionLabel, short: t.permissionShort, color: "#92400e", bg: "#fef3c7", border: "#fcd34d" },
   };
 
-  const personAbsences = absences[selId] ?? {};
+  const personAbsences = absences[selIdSafe] ?? {};
   const cells          = calendarCells(year, month);
   const prefix         = monthPrefix(year, month);
 
@@ -77,7 +80,7 @@ export default function AbsenceCalendar({ people, absences, onToggle, onClose })
               return (
                 <div
                   key={p.id}
-                  className={`absence-person-row${p.id === selId ? " selected" : ""}`}
+                  className={`absence-person-row${p.id === selIdSafe ? " selected" : ""}`}
                   onClick={() => setSelId(p.id)}
                 >
                   <div
@@ -139,7 +142,7 @@ export default function AbsenceCalendar({ people, absences, onToggle, onClose })
                     key={i}
                     className={`cal-cell${isToday ? " cal-today" : ""}${aType ? " cal-absent" : ""}`}
                     style={aType ? { background: aType.bg, borderColor: aType.border } : {}}
-                    onClick={() => onToggle(selId, iso, cycleAbsence(absence))}
+                    onClick={() => onToggle(selIdSafe, iso, cycleAbsence(absence))}
                     title={aType ? aType.label : ""}
                   >
                     <span className="cal-day-num" style={aType ? { color: aType.color, fontWeight: 700 } : {}}>

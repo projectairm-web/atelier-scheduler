@@ -3,11 +3,11 @@ import { addDays } from "../utils/date.js";
 import { personColor, initials, displayName } from "../utils/people.js";
 import { useTranslation } from "../i18n/index.jsx";
 
-const todayMidnight = (() => {
+function getTodayMidnight() {
   const d = new Date();
   d.setHours(0, 0, 0, 0);
   return d;
-})();
+}
 
 function sameDay(a, b) {
   return a.getFullYear() === b.getFullYear() &&
@@ -19,6 +19,8 @@ export default function ScheduleGrid({
   stores, people, weekSchedule, currentMonday, absences, onCellClick,
 }) {
   const { t } = useTranslation();
+  // Recomputed on each render so it stays correct if the app is open past midnight
+  const todayMidnight = getTodayMidnight();
 
   return (
     <div className="schedule-wrap">

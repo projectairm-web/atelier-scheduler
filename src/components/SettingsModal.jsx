@@ -80,7 +80,7 @@ function StoresTab({ stores, onUpdate, onAdd, onDelete }) {
 }
 
 /* ── People Tab ─────────────────────────────────────────── */
-function PeopleTab({ people, onUpdate, onAdd, onDelete }) {
+function PeopleTab({ people, stores, onUpdate, onAdd, onDelete }) {
   const { t } = useTranslation();
 
   function toggleDay(person, dayIdx) {
@@ -96,6 +96,18 @@ function PeopleTab({ people, onUpdate, onAdd, onDelete }) {
   function isDayAvailable(person, dayIdx) {
     const av = person.availability ?? [];
     return av.length === 0 || av.includes(dayIdx);
+  }
+
+  function toggleBlockedStore(person, storeId) {
+    const current = person.blockedStores ?? [];
+    const next    = current.includes(storeId)
+      ? current.filter(id => id !== storeId)
+      : [...current, storeId];
+    onUpdate(person.id, { blockedStores: next });
+  }
+
+  function isStoreBlocked(person, storeId) {
+    return (person.blockedStores ?? []).includes(storeId);
   }
 
   return (
@@ -140,6 +152,26 @@ function PeopleTab({ people, onUpdate, onAdd, onDelete }) {
                   })}
                 </div>
               </div>
+              {stores.length > 0 && (
+                <div className="field-group field-grow">
+                  <label className="field-label">{t.blockedStores}</label>
+                  <div className="day-checks">
+                    {stores.map(store => {
+                      const blocked = isStoreBlocked(person, store.id);
+                      return (
+                        <button
+                          key={store.id}
+                          className={`day-check-btn store-block-btn${blocked ? " day-off blocked" : " day-on"}`}
+                          onClick={() => toggleBlockedStore(person, store.id)}
+                          title={store.name}
+                        >
+                          {store.name.length > 6 ? store.name.slice(0, 5) + "…" : store.name}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
               <div className="field-group field-sm">
                 <label className="field-label">{t.notesLabel}</label>
                 <input
@@ -213,6 +245,7 @@ export default function SettingsModal({
         ) : (
           <PeopleTab
             people={people}
+            stores={stores}
             onUpdate={onUpdatePerson}
             onAdd={onAddPerson}
             onDelete={onDeletePerson}

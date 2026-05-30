@@ -83,6 +83,8 @@ export const translations = {
     autoSave:        "Le modifiche vengono salvate automaticamente. Rigenera la pianificazione per applicarle.",
 
     // New features
+    blockedStores:   "Negozi esclusi",
+    blockedFromStore: "non assegnabile a questo negozio",
     copyPrevWeek:    "Copia sett. prec.",
     noPrevWeek:      "Nessuna pianificazione settimana scorsa",
     shareSchedule:   "Condividi",
@@ -168,6 +170,8 @@ export const translations = {
     addPerson:       "Add person",
     autoSave:        "Changes are saved automatically. Regenerate the schedule to apply them.",
 
+    blockedStores:    "Blocked stores",
+    blockedFromStore: "not allowed at this store",
     copyPrevWeek:    "Copy prev. week",
     noPrevWeek:      "No schedule for previous week",
     shareSchedule:   "Share",
@@ -252,6 +256,8 @@ export const translations = {
     addPerson:       "Añadir persona",
     autoSave:        "Los cambios se guardan automáticamente. Regenera la planificación para aplicarlos.",
 
+    blockedStores:    "Tiendas excluidas",
+    blockedFromStore: "no asignable a esta tienda",
     copyPrevWeek:    "Copiar sem. ant.",
     noPrevWeek:      "Sin planificación la semana anterior",
     shareSchedule:   "Compartir",

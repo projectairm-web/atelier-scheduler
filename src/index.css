@@ -630,6 +630,11 @@ body {
 }
 .day-check-btn.day-off:hover { border-color: var(--accent); color: var(--accent); }
 
+/* Blocked store toggle — red when blocked */
+.store-block-btn { min-width: 44px; font-size: 10px; padding: 0 4px; }
+.store-block-btn.blocked { background: var(--red-light); color: var(--red); border-color: #fca5a5; }
+.store-block-btn.blocked:hover { border-color: var(--red); }
+
 /* Delete button */
 .row-delete {
   width: 30px; height: 30px; flex-shrink: 0;

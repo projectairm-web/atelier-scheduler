@@ -1,5 +1,5 @@
 import { X, Check } from "lucide-react";
-import { addDays } from "../utils/date.js";
+import { addDays, toLocalDateStr } from "../utils/date.js";
 import { personColor, initials, displayName } from "../utils/people.js";
 import { useTranslation } from "../i18n/index.jsx";
 
@@ -13,7 +13,8 @@ export default function AssignModal({
 
   const store    = stores.find(s => s.id === storeId);
   const assigned = weekSchedule[day]?.[storeId] || [];
-  const dateStr  = addDays(currentMonday, day).toISOString().slice(0, 10);
+  // Use local date string to match absence keys (fixes UTC timezone bug)
+  const dateStr  = toLocalDateStr(addDays(currentMonday, day));
 
   const elsewhereToday = new Set(
     Object.entries(weekSchedule[day] || {})
@@ -48,15 +49,17 @@ export default function AssignModal({
             const av            = person.availability ?? [];
             const isUnavailable = !isAssigned && av.length > 0 && !av.includes(day);
             const absenceType   = !isAssigned && absences[person.id]?.[dateStr];
-            const disabled      = isElsewhere || isFull || isUnavailable || !!absenceType;
+            const isBlocked     = !isAssigned && (person.blockedStores ?? []).includes(storeId);
+            const disabled      = isElsewhere || isFull || isUnavailable || !!absenceType || isBlocked;
 
             let meta;
-            if (absenceType === "ferie")    meta = t.onLeave;
-            else if (absenceType)           meta = t.onPermission;
-            else if (isUnavailable)         meta = t.unavailableDay;
-            else if (isElsewhere)           meta = t.alreadyToday;
-            else if (isFull)                meta = t.maxReached(person.maxDays);
-            else                            meta = t.daysCount(weekDayCounts[person.id] || 0, person.maxDays);
+            if (isBlocked)                  meta = t.blockedFromStore;
+            else if (absenceType === "ferie") meta = t.onLeave;
+            else if (absenceType)            meta = t.onPermission;
+            else if (isUnavailable)          meta = t.unavailableDay;
+            else if (isElsewhere)            meta = t.alreadyToday;
+            else if (isFull)                 meta = t.maxReached(person.maxDays);
+            else                             meta = t.daysCount(weekDayCounts[person.id] || 0, person.maxDays);
 
             return (
               <div

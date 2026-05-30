@@ -1,6 +1,6 @@
 {
   "appId": "com.atelier.pianificazione",
-  "appName": "Atelier Pianificazione",
+  "appName": "Atelier Scheduler",
   "webDir": "dist",
   "server": {
     "androidScheme": "https"

@@ -12,7 +12,7 @@ export const translations = {
     locale: "it-IT",
 
     // Header
-    brandSub:   "Pianificazione",
+    brandSub:   "Scheduler",
     today:      "Oggi",
     absences:   "Assenze",
     settings:   "Impostazioni",

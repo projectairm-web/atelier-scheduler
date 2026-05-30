@@ -3,7 +3,7 @@ import { STORAGE_KEY, SEED } from "./constants/index.js";
 import { getMondayOf, addDays, weekKey, formatWeekRange, toLocalDateStr } from "./utils/date.js";
 import { uid } from "./utils/people.js";
 import { generateSchedule } from "./algorithms/scheduler.js";
-import { exportWeekToExcel } from "./utils/export.js";
+import { exportWeekToExcel, exportWeekToPdf, shareWeekText } from "./utils/export.js";
 import { useTranslation } from "./i18n/index.jsx";
 import Header from "./components/Header.jsx";
 import ScheduleGrid from "./components/ScheduleGrid.jsx";
@@ -11,6 +11,7 @@ import PeoplePanel from "./components/PeoplePanel.jsx";
 import AssignModal from "./components/AssignModal.jsx";
 import SettingsModal from "./components/SettingsModal.jsx";
 import AbsenceCalendar from "./components/AbsenceCalendar.jsx";
+import StatsModal from "./components/StatsModal.jsx";
 import BottomNav from "./components/BottomNav.jsx";
 
 /* ── Persistence ────────────────────────────────────────── */
@@ -19,7 +20,6 @@ function loadState() {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) {
       const parsed = JSON.parse(raw);
-      // Ensure absences key exists for older saves
       return { absences: {}, ...parsed };
     }
   } catch {}
@@ -41,11 +41,12 @@ export function countPersonWeekDays(weekSched, personId) {
 /* ── Root Component ─────────────────────────────────────── */
 export default function App() {
   const { t } = useTranslation();
-  const [state, setState] = useState(loadState);
+  const [state, setState]       = useState(loadState);
   const [currentMonday, setCurrentMonday] = useState(() => getMondayOf(new Date()));
-  const [modal,         setModal]         = useState(null);  // { day, storeId }
+  const [modal,         setModal]         = useState(null);
   const [showSettings,  setShowSettings]  = useState(false);
   const [showAbsences,  setShowAbsences]  = useState(false);
+  const [showStats,     setShowStats]     = useState(false);
   const [activeTab,     setActiveTab]     = useState("schedule");
 
   useEffect(() => {
@@ -54,6 +55,8 @@ export default function App() {
 
   const wk           = weekKey(currentMonday);
   const weekSchedule = state.schedules[wk] || {};
+  const prevWk       = weekKey(addDays(currentMonday, -7));
+  const hasPrevWeek  = !!state.schedules[prevWk];
 
   // ── Week navigation
   const prevWeek = () => setCurrentMonday(d => addDays(d, -7));
@@ -77,19 +80,29 @@ export default function App() {
     });
   };
 
-  // ── Export
+  const handleCopyPrevWeek = () => {
+    const prev = state.schedules[prevWk];
+    if (!prev) return;
+    setState(s => ({ ...s, schedules: { ...s.schedules, [wk]: { ...prev } } }));
+  };
+
+  // ── Export / Share
   const handleExport = async () => {
     try {
-      await exportWeekToExcel({
-        stores: state.stores,
-        people: state.people,
-        weekSchedule,
-        monday: currentMonday,
-      });
-    } catch (err) {
-      console.error("Export failed:", err);
-      alert("Errore durante l'esportazione: " + (err?.message ?? err));
-    }
+      await exportWeekToExcel({ stores: state.stores, people: state.people, weekSchedule, monday: currentMonday });
+    } catch (err) { console.error("Excel export failed:", err); }
+  };
+
+  const handleExportPdf = async () => {
+    try {
+      await exportWeekToPdf({ stores: state.stores, people: state.people, weekSchedule, monday: currentMonday });
+    } catch (err) { console.error("PDF export failed:", err); }
+  };
+
+  const handleShare = async () => {
+    try {
+      await shareWeekText({ stores: state.stores, people: state.people, weekSchedule, monday: currentMonday, days: t.days });
+    } catch (err) { console.error("Share failed:", err); }
   };
 
   // ── Toggle person in a slot
@@ -112,7 +125,6 @@ export default function App() {
         const av = person.availability ?? [];
         if (av.length > 0 && !av.includes(day)) return s;
 
-        // Check absence for this specific date (local date, not UTC)
         const dateStr = toLocalDateStr(addDays(currentMonday, day));
         if (s.absences[personId]?.[dateStr]) return s;
 
@@ -133,23 +145,20 @@ export default function App() {
   const toggleAbsence = (personId, dateStr, absenceType) => {
     setState(s => {
       const personAbs = { ...(s.absences[personId] || {}) };
-      if (!absenceType) {
-        delete personAbs[dateStr];
-      } else {
-        personAbs[dateStr] = absenceType;
-      }
+      if (!absenceType) { delete personAbs[dateStr]; }
+      else              { personAbs[dateStr] = absenceType; }
       return { ...s, absences: { ...s.absences, [personId]: personAbs } };
     });
   };
 
   // ── Store CRUD
-  const updateStore  = (id, patch) =>
+  const updateStore = (id, patch) =>
     setState(s => ({ ...s, stores: s.stores.map(st => st.id === id ? { ...st, ...patch } : st) }));
 
   const addStore = () =>
     setState(s => ({
       ...s,
-      stores: [...s.stores, { id: uid(), name: "", city: "", priority: "normale", staffNeeded: 1 }],
+      stores: [...s.stores, { id: uid(), name: "", city: "", priority: "normale", staffNeeded: 1, closed: false }],
     }));
 
   const deleteStore = (id) =>
@@ -157,8 +166,8 @@ export default function App() {
       ...s,
       stores: s.stores.filter(st => st.id !== id),
       schedules: Object.fromEntries(
-        Object.entries(s.schedules).map(([wk, ws]) => [
-          wk,
+        Object.entries(s.schedules).map(([k, ws]) => [
+          k,
           Object.fromEntries(
             Object.entries(ws).map(([day, byStore]) => [
               day,
@@ -188,8 +197,8 @@ export default function App() {
         people: s.people.filter(p => p.id !== id),
         absences,
         schedules: Object.fromEntries(
-          Object.entries(s.schedules).map(([wk, ws]) => [
-            wk,
+          Object.entries(s.schedules).map(([k, ws]) => [
+            k,
             Object.fromEntries(
               Object.entries(ws).map(([day, byStore]) => [
                 day,
@@ -203,7 +212,6 @@ export default function App() {
       };
     });
 
-  // Per-person day counts for this week
   const weekDayCounts = {};
   state.people.forEach(p => {
     weekDayCounts[p.id] = countPersonWeekDays(weekSchedule, p.id);
@@ -238,8 +246,13 @@ export default function App() {
             onGenerate={handleGenerate}
             onClear={handleClear}
             onExport={handleExport}
+            onExportPdf={handleExportPdf}
+            onShare={handleShare}
+            onCopyPrevWeek={handleCopyPrevWeek}
+            onStats={() => setShowStats(true)}
             onAbsences={() => setShowAbsences(true)}
             onSettings={() => setShowSettings(true)}
+            hasPrevWeek={hasPrevWeek}
           />
         </div>
       </div>
@@ -281,6 +294,17 @@ export default function App() {
           absences={state.absences}
           onToggle={toggleAbsence}
           onClose={() => setShowAbsences(false)}
+        />
+      )}
+
+      {showStats && (
+        <StatsModal
+          stores={state.stores}
+          people={state.people}
+          schedules={state.schedules}
+          currentMonday={currentMonday}
+          weekDayCounts={weekDayCounts}
+          onClose={() => setShowStats(false)}
         />
       )}
     </div>

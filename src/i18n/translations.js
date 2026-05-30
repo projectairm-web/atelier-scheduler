@@ -82,6 +82,16 @@ export const translations = {
     addPerson:       "Aggiungi persona",
     autoSave:        "Le modifiche vengono salvate automaticamente. Rigenera la pianificazione per applicarle.",
 
+    // New features
+    copyPrevWeek:    "Copia sett. prec.",
+    noPrevWeek:      "Nessuna pianificazione settimana scorsa",
+    shareSchedule:   "Condividi",
+    statsBtn:        "Statistiche",
+    statsTitle:      "Statistiche",
+    statsBasedOn:    (n) => `Basato su ${n} settimane`,
+    closedStore:     "Chiuso",
+    openStore:       "Apri",
+
     // Absence calendar
     absencesTitle:   "Assenze & Ferie",
     totalAbsences:   (n) => `${n} giorno/i`,
@@ -158,6 +168,15 @@ export const translations = {
     addPerson:       "Add person",
     autoSave:        "Changes are saved automatically. Regenerate the schedule to apply them.",
 
+    copyPrevWeek:    "Copy prev. week",
+    noPrevWeek:      "No schedule for previous week",
+    shareSchedule:   "Share",
+    statsBtn:        "Stats",
+    statsTitle:      "Statistics",
+    statsBasedOn:    (n) => `Based on ${n} weeks`,
+    closedStore:     "Closed",
+    openStore:       "Open",
+
     absencesTitle:   "Absences & Leave",
     totalAbsences:   (n) => `${n} day(s)`,
     leaveStat:       (n) => `${n} leave days`,
@@ -232,6 +251,15 @@ export const translations = {
     notesPh:         "ej. Media jornada",
     addPerson:       "Añadir persona",
     autoSave:        "Los cambios se guardan automáticamente. Regenera la planificación para aplicarlos.",
+
+    copyPrevWeek:    "Copiar sem. ant.",
+    noPrevWeek:      "Sin planificación la semana anterior",
+    shareSchedule:   "Compartir",
+    statsBtn:        "Estadísticas",
+    statsTitle:      "Estadísticas",
+    statsBasedOn:    (n) => `Basado en ${n} semanas`,
+    closedStore:     "Cerrado",
+    openStore:       "Abrir",
 
     absencesTitle:   "Ausencias y Vacaciones",
     totalAbsences:   (n) => `${n} día(s)`,

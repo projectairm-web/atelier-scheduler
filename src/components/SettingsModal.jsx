@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { X, Plus, Trash2, Store, Users } from "lucide-react";
+import { X, Plus, Trash2, Store, Users, PowerOff } from "lucide-react";
 import { uid } from "../utils/people.js";
 import { useTranslation } from "../i18n/index.jsx";
 
@@ -52,13 +52,22 @@ function StoresTab({ stores, onUpdate, onAdd, onDelete }) {
                 />
               </div>
             </div>
-            <button
-              className="row-delete"
-              onClick={() => onDelete(store.id)}
-              disabled={stores.length <= 1}
-            >
-              <Trash2 size={14} />
-            </button>
+            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+              <button
+                className={`row-closed-toggle${store.closed ? " closed" : ""}`}
+                title={store.closed ? t.openStore : t.closedStore}
+                onClick={() => onUpdate(store.id, { closed: !store.closed })}
+              >
+                <PowerOff size={13} />
+              </button>
+              <button
+                className="row-delete"
+                onClick={() => onDelete(store.id)}
+                disabled={stores.length <= 1}
+              >
+                <Trash2 size={14} />
+              </button>
+            </div>
           </div>
         ))}
       </div>

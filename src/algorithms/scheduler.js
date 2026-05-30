@@ -38,6 +38,7 @@ export function generateSchedule(data, { monday, absences = {} } = {}) {
     const dateStr = monday ? toLocalDateStr(addDays(monday, day)) : null;
 
     for (const store of sortedStores) {
+      if (store.closed) { schedule[day][store.id] = []; continue; }
       const assigned = [];
 
       const available = [...data.people]

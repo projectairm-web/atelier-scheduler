@@ -45,22 +45,36 @@ export default function ScheduleGrid({
 
         <tbody>
           {stores.map(store => (
-            <tr key={store.id}>
+            <tr key={store.id} className={store.closed ? "store-row-closed" : ""}>
               <td className="store-cell">
                 <div className="store-name">{store.name}</div>
                 <div className="store-city">{store.city}</div>
                 <div className="store-footer">
-                  <span className={`badge badge-${store.priority}`}>
-                    {store.priority === "critica" ? t.critical : t.normal}
-                  </span>
-                  <span className="staff-needed">
-                    <Users size={9} />
-                    {store.staffNeeded}
-                  </span>
+                  {store.closed ? (
+                    <span className="badge badge-closed">{t.closedStore}</span>
+                  ) : (
+                    <>
+                      <span className={`badge badge-${store.priority}`}>
+                        {store.priority === "critica" ? t.critical : t.normal}
+                      </span>
+                      <span className="staff-needed">
+                        <Users size={9} />
+                        {store.staffNeeded}
+                      </span>
+                    </>
+                  )}
                 </div>
               </td>
 
               {[0, 1, 2, 3, 4, 5, 6].map(dayIdx => {
+                if (store.closed) {
+                  return (
+                    <td key={dayIdx}>
+                      <div className="day-cell day-cell-closed" />
+                    </td>
+                  );
+                }
+
                 const d = addDays(currentMonday, dayIdx);
                 const isToday = sameDay(d, todayMidnight);
                 const assigned = weekSchedule[dayIdx]?.[store.id] || [];

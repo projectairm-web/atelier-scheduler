@@ -1,11 +1,12 @@
-import { Wand2, Trash2, Download, CalendarDays, Settings } from "lucide-react";
+import { Wand2, Trash2, Download, CalendarDays, Settings, Copy, Share2, FileText, BarChart2 } from "lucide-react";
 import { personColor, initials, displayName } from "../utils/people.js";
 import { useTranslation } from "../i18n/index.jsx";
 
 export default function PeoplePanel({
   people, weekDayCounts,
-  onGenerate, onClear, onExport,
+  onGenerate, onClear, onExport, onExportPdf, onShare, onCopyPrevWeek, onStats,
   onAbsences, onSettings,
+  hasPrevWeek,
 }) {
   const { t } = useTranslation();
 
@@ -48,16 +49,44 @@ export default function PeoplePanel({
           <Wand2 size={14} />
           {t.generate}
         </button>
-        <button className="btn btn-ghost" onClick={onExport}>
-          <Download size={14} />
-          {t.exportExcel}
-        </button>
-        <button className="btn btn-ghost" onClick={onClear}>
-          <Trash2 size={14} />
-          {t.clearWeek}
+
+        <button
+          className="btn btn-ghost"
+          onClick={onCopyPrevWeek}
+          disabled={!hasPrevWeek}
+          title={!hasPrevWeek ? t.noPrevWeek : ""}
+        >
+          <Copy size={14} />
+          {t.copyPrevWeek}
         </button>
 
-        {/* Only visible on mobile (hidden on desktop via CSS) */}
+        <div className="btn-row">
+          <button className="btn btn-ghost" onClick={onExport}>
+            <Download size={14} />
+            Excel
+          </button>
+          <button className="btn btn-ghost" onClick={onExportPdf}>
+            <FileText size={14} />
+            PDF
+          </button>
+        </div>
+
+        <button className="btn btn-ghost" onClick={onShare}>
+          <Share2 size={14} />
+          {t.shareSchedule}
+        </button>
+
+        <div className="btn-row">
+          <button className="btn btn-ghost" onClick={onStats}>
+            <BarChart2 size={14} />
+            {t.statsBtn}
+          </button>
+          <button className="btn btn-ghost" onClick={onClear}>
+            <Trash2 size={14} />
+            {t.clearWeek}
+          </button>
+        </div>
+
         {onAbsences && (
           <button className="btn btn-ghost panel-mobile-only" onClick={onAbsences}>
             <CalendarDays size={14} />

@@ -48,7 +48,9 @@ function StoresTab({ stores, onUpdate, onAdd, onDelete }) {
                   type="number"
                   min={1} max={10}
                   value={store.staffNeeded}
-                  onChange={e => onUpdate(store.id, { staffNeeded: Math.max(1, +e.target.value) })}
+                  onFocus={e => e.target.select()}
+                  onChange={e => { const n = parseInt(e.target.value, 10); if (n >= 1) onUpdate(store.id, { staffNeeded: Math.min(10, n) }); }}
+                  onBlur={e => { if (!e.target.value || parseInt(e.target.value, 10) < 1) onUpdate(store.id, { staffNeeded: 1 }); }}
                 />
               </div>
             </div>
@@ -132,7 +134,9 @@ function PeopleTab({ people, stores, onUpdate, onAdd, onDelete }) {
                   type="number"
                   min={1} max={7}
                   value={person.maxDays}
-                  onChange={e => onUpdate(person.id, { maxDays: Math.min(7, Math.max(1, +e.target.value)) })}
+                  onFocus={e => e.target.select()}
+                  onChange={e => { const n = parseInt(e.target.value, 10); if (n >= 1) onUpdate(person.id, { maxDays: Math.min(7, n) }); }}
+                  onBlur={e => { if (!e.target.value || parseInt(e.target.value, 10) < 1) onUpdate(person.id, { maxDays: 1 }); }}
                 />
               </div>
               <div className="field-group field-grow">
